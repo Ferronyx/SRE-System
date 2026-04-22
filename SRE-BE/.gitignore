@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+newrelic_agent.log
+
+# Build output
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SSL / certs
+*.pem
+
+# IDE
+.vscode/
+.idea/
+
+API.md
+CLAUDE.md
+docs.md
+
+
+.claude/

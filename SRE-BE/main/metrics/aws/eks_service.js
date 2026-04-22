@@ -1,0 +1,183 @@
+'use strict';
+
+const eks_service_container_insights_metrics = {
+  pod_cpu_utilization: {
+    dimensions: [
+      { Name: 'ClusterName', Value: '' },
+      { Name: 'Namespace', Value: '' },
+      { Name: 'Service', Value: '' },
+    ],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_memory_utilization: {
+    dimensions: [
+      { Name: 'ClusterName', Value: '' },
+      { Name: 'Namespace', Value: '' },
+      { Name: 'Service', Value: '' },
+    ],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_status_failed: {
+    dimensions: [
+      { Name: 'ClusterName', Value: '' },
+      { Name: 'Namespace', Value: '' },
+      { Name: 'Service', Value: '' },
+    ],
+    namespace: 'ContainerInsights',
+    unit: 'Count',
+    global_threshold: {
+      threshold_value: 10,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Count',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_number_of_container_restarts: {
+    dimensions: [
+      { Name: 'ClusterName', Value: '' },
+      { Name: 'Namespace', Value: '' },
+      { Name: 'Service', Value: '' },
+    ],
+    namespace: 'ContainerInsights',
+    unit: 'Count',
+    global_threshold: {
+      threshold_value: 10,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Count',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_memory_utilization_over_pod_limit: {
+    dimensions: [
+      { Name: 'ClusterName', Value: '' },
+      { Name: 'Namespace', Value: '' },
+      { Name: 'Service', Value: '' },
+    ],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_cpu_utilization_over_pod_limit: {
+    dimensions: [
+      { Name: 'ClusterName', Value: '' },
+      { Name: 'Namespace', Value: '' },
+      { Name: 'Service', Value: '' },
+    ],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+};
+
+const eks_namespace_container_insights_metrics = {
+  pod_cpu_utilization: {
+    dimensions: [{ Name: 'ClusterName', Value: '' }, { Name: 'Namespace', Value: '' }],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_memory_utilization: {
+    dimensions: [{ Name: 'ClusterName', Value: '' }, { Name: 'Namespace', Value: '' }],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_memory_utilization_over_pod_limit: {
+    dimensions: [{ Name: 'ClusterName', Value: '' }, { Name: 'Namespace', Value: '' }],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+  pod_cpu_utilization_over_pod_limit: {
+    dimensions: [{ Name: 'ClusterName', Value: '' }, { Name: 'Namespace', Value: '' }],
+    namespace: 'ContainerInsights',
+    unit: 'Percent',
+    global_threshold: {
+      threshold_value: 90,
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      statistic: 'Average',
+      period: 60,
+      evaluation_periods: 10,
+      unit: 'Percent',
+      threshold_type: 'Static',
+    },
+    metric_weight: 1,
+  },
+};
+
+module.exports = { eks_service_container_insights_metrics, eks_namespace_container_insights_metrics };

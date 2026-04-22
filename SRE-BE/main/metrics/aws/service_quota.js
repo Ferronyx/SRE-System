@@ -1,0 +1,158 @@
+'use strict';
+
+const service_quota_metrics = {
+  DBClusters: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'DBClusters' },
+      { Name: 'Service', Value: 'Amazon Relational Database Service (Amazon RDS)' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    namespace: 'AWS/RDS',
+    unit: 'Percent',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'RDS DB Clusters Service Quota',
+      resource_name: 'DBClusters',
+      metric_name: 'ResourceCount',
+    },
+  },
+  DBInstances: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'DBInstances' },
+      { Name: 'Service', Value: 'Amazon Relational Database Service (Amazon RDS)' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/RDS',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'RDS DB Instances Service Quota',
+      resource_name: 'DBInstances',
+      metric_name: 'ResourceCount',
+    },
+  },
+  GraphQLAPIs: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'GraphQLAPIs' },
+      { Name: 'Service', Value: 'AWS AppSync' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/AppSync',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'AppSync GraphQLAPIs Service Quota',
+      resource_name: 'GraphQLAPIs',
+      metric_name: 'ResourceCount',
+    },
+  },
+  CachesPerRegion: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'CachesPerRegion' },
+      { Name: 'Service', Value: 'Amazon ElastiCache' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/ElastiCache',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'ElastiCache Caches Per Region Service Quota',
+      resource_name: 'CachesPerRegion',
+      metric_name: 'ResourceCount',
+    },
+  },
+  NodesPerRegion: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'NodesPerRegion' },
+      { Name: 'Service', Value: 'Amazon ElastiCache' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/ElastiCache',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'ElastiCache Nodes Per Region Service Quota',
+      resource_name: 'NodesPerRegion',
+      metric_name: 'ResourceCount',
+    },
+  },
+  NetworkLoadBalancersPerRegion: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'NetworkLoadBalancersPerRegion' },
+      { Name: 'Service', Value: 'Elastic Load Balancing' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/ELB',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'ELB Network LoadBalancers Service Quota',
+      resource_name: 'NetworkLoadBalancersPerRegion',
+      metric_name: 'ResourceCount',
+    },
+  },
+  ApplicationLoadBalancersPerRegion: {
+    dimensions: [
+      { Name: 'Class', Value: 'None' },
+      { Name: 'Resource', Value: 'ApplicationLoadBalancersPerRegion' },
+      { Name: 'Service', Value: 'Elastic Load Balancing' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/ELB',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'ALB LoadBalancers Service Quota',
+      resource_name: 'ApplicationLoadBalancersPerRegion',
+      metric_name: 'ResourceCount',
+    },
+  },
+  vCPU: {
+    dimensions: [
+      { Name: 'Class', Value: 'Standard/OnDemand' },
+      { Name: 'Resource', Value: 'vCPU' },
+      { Name: 'Service', Value: 'Amazon Elastic Compute Cloud - Compute' },
+      { Name: 'Type', Value: 'Resource' },
+    ],
+    unit: 'Percent',
+    namespace: 'AWS/EC2',
+    global_threshold_service_quota: {
+      threshold_condition: 'GreaterThanOrEqualToThreshold',
+      threshold_value: 80,
+      period: 60,
+      evaluation_periods: 5,
+      name: 'On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances',
+      resource_name: 'vCPU',
+      metric_name: 'ResourceCount',
+    },
+  },
+};
+
+module.exports = { service_quota_metrics };
