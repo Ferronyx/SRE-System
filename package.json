@@ -1,0 +1,13 @@
+{
+  "name": "sre",
+  "version": "1.0.0",
+  "description": "SRE monorepo — runs frontend and backend together",
+  "scripts": {
+    "start": "concurrently --names \"BE,FE\" --prefix-colors \"cyan,magenta\" \"npm run dev --prefix SRE-BE\" \"npm run dev --prefix SRE-FE\"",
+    "start:be": "npm run dev --prefix SRE-BE",
+    "start:fe": "npm run dev --prefix SRE-FE"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

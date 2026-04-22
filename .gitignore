@@ -1,0 +1,18 @@
+# Root dependencies (concurrently etc.)
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
