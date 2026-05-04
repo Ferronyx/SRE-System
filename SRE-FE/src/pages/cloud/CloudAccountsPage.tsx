@@ -209,89 +209,109 @@ function AccountCard({ account, resourceCount, onDeleteRequest, onViewResources 
     ? 'flex items-start gap-2 text-xs px-3 py-2 rounded-md bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 transition-all duration-200'
     : 'flex items-start gap-2 text-xs px-3 py-2 rounded-md bg-destructive/10 text-destructive border border-destructive/20 transition-all duration-200'
 
-  return (
-    <Card className="border-border/50 bg-card transition-all duration-200 hover:border-border/80 hover:shadow-lg hover:-translate-y-0.5">
-      <CardContent className="p-5 space-y-4">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <ProviderIcon provider={account.provider} />
-          <Badge
-            variant="outline"
-            className={cn(statusConfig.badge, 'text-[11px] font-semibold tracking-wide gap-1.5 transition-colors duration-300')}
-          >
-            <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', statusConfig.dot)} />
-            {statusConfig.label}
-          </Badge>
-        </div>
+  const resourceDisplay = resourceCount !== null
+    ? resourceCount.toLocaleString()
+    : '—'
+  const regionDisplay = account.regions?.length > 0
+    ? account.regions.length.toString()
+    : 'All'
 
-        {/* Identity */}
-        <div>
-          <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-medium">{providerLabel}</p>
-          <h3 className="text-xl font-bold text-foreground leading-tight mt-0.5">{account.name}</h3>
-          <p className="text-xs text-muted-foreground mt-1 font-mono">ID: {account.credential_display}</p>
+  return (
+    <Card className="group border-border/50 bg-card transition-all duration-200 hover:border-border hover:shadow-md">
+      <CardContent className="p-5">
+        {/* Header */}
+        <div className="flex items-start gap-3.5">
+          <ProviderIcon provider={account.provider} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-base font-semibold text-foreground leading-tight truncate">
+                {account.name}
+              </h3>
+              <Badge
+                variant="outline"
+                className={cn(
+                  statusConfig.badge,
+                  'shrink-0 text-[10px] font-semibold tracking-wide gap-1.5 transition-colors duration-300',
+                )}
+              >
+                <span className={cn('w-1.5 h-1.5 rounded-full', statusConfig.dot)} />
+                {statusConfig.label}
+              </Badge>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
+              <span className="font-medium shrink-0">{providerLabel}</span>
+              <span className="text-border shrink-0">·</span>
+              <span className="font-mono truncate">{account.credential_display}</span>
+            </div>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 py-1">
-          <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Resources</p>
-            <p className="text-2xl font-bold text-foreground mt-0.5">
-              {resourceCount !== null
-                ? resourceCount.toLocaleString()
-                : <span className="text-muted-foreground text-base">—</span>
-              }
-            </p>
+        <div className="mt-4 grid grid-cols-3 rounded-lg border border-border/50 bg-muted/20 overflow-hidden">
+          <div className="px-3 py-2.5 border-r border-border/50">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Resources</p>
+            <p className="mt-0.5 text-base font-semibold text-foreground tabular-nums">{resourceDisplay}</p>
           </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Regions</p>
-            <p className="text-2xl font-bold text-foreground mt-0.5">
-              {account.regions?.length > 0
-                ? account.regions.length
-                : <span className="text-muted-foreground text-base">All</span>
-              }
-            </p>
+          <div className="px-3 py-2.5 border-r border-border/50">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Regions</p>
+            <p className="mt-0.5 text-base font-semibold text-foreground tabular-nums">{regionDisplay}</p>
+          </div>
+          <div className="px-3 py-2.5 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Last sync</p>
+            <p className="mt-0.5 text-sm font-medium text-foreground truncate">{lastSynced}</p>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="pt-3 border-t border-border/40 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">Last sync: {lastSynced}</p>
-          <div className="flex items-center gap-0.5">
-            <Button
-              variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              disabled={isBusy} onClick={handleValidate} title="Validate credentials"
-            >
-              {isValidating ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />}
-            </Button>
-            <Button
-              variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              disabled={isBusy} onClick={handleSync} title="Sync account"
-            >
-              {isSyncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-            </Button>
-            <Button
-              variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              title="View resources" onClick={() => onViewResources(account.id)}
-            >
-              <LayoutList size={12} />
-            </Button>
-            <Button
-              variant="ghost" size="sm"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-150"
-              disabled={isSyncing} onClick={() => onDeleteRequest(account)} title="Delete account"
-            >
-              <Trash2 size={12} />
-            </Button>
-          </div>
+        {/* Actions */}
+        <div className="mt-4 flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-2.5 gap-1.5 text-xs"
+            disabled={isBusy}
+            onClick={handleValidate}
+          >
+            {isValidating ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />}
+            Validate
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-2.5 gap-1.5 text-xs"
+            disabled={isBusy}
+            onClick={handleSync}
+          >
+            {isSyncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+            Sync
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2.5 gap-1.5 text-xs ml-auto text-muted-foreground hover:text-foreground"
+            onClick={() => onViewResources(account.id)}
+          >
+            <LayoutList size={12} />
+            Resources
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-150"
+            disabled={isSyncing}
+            onClick={() => onDeleteRequest(account)}
+            title="Delete account"
+          >
+            <Trash2 size={13} />
+          </Button>
         </div>
 
         {/* Validate result */}
         {hasValidateResult && (
-          <div className={validateResultCls}>
+          <div className={cn('mt-3', validateResultCls)}>
             {validateValid ? (
               <>
                 <CheckCircle2 size={13} className="shrink-0 mt-0.5" />
-                <span>
+                <span className="min-w-0 break-words">
                   Valid — Account <strong>{validateResult!.accountId}</strong>
                   {validateResult!.arn && (
                     <> · <span className="font-mono break-all">{validateResult!.arn}</span></>
@@ -301,7 +321,7 @@ function AccountCard({ account, resourceCount, onDeleteRequest, onViewResources 
             ) : (
               <>
                 <XCircle size={13} className="shrink-0 mt-0.5" />
-                <span>{validateResult!.error ?? 'Invalid credentials'}</span>
+                <span className="min-w-0 break-words">{validateResult!.error ?? 'Invalid credentials'}</span>
               </>
             )}
           </div>

@@ -127,15 +127,15 @@ function getServiceLabel(service: string): string {
 function statusBadgeCls(status: string): string {
   const s = status?.toLowerCase()
   if (['running', 'active', 'available', 'healthy', 'ok', 'in-use'].includes(s)) {
-    return 'border-emerald-500/30 text-emerald-600 bg-emerald-500/10'
+    return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
   }
   if (['stopped', 'idle', 'inactive'].includes(s)) {
-    return 'border-border/60 text-muted-foreground bg-muted/50'
+    return 'bg-muted text-white/70 border border-border'
   }
   if (['failed', 'error', 'unhealthy', 'terminated', 'deleting'].includes(s)) {
-    return 'border-destructive/30 text-destructive bg-destructive/10'
+    return 'bg-red-500/15 text-red-400 border border-red-500/20'
   }
-  return 'border-yellow-500/30 text-yellow-600 bg-yellow-500/10'
+  return 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
 }
 
 function formatOperator(op: string): string {
@@ -724,18 +724,20 @@ function ResourceDetailContent({ resource, accountId }: { resource: Resource; ac
   )
 }
 
+// ─── Resource table row layout ────────────────────────────────────────────────
+
+const RESOURCE_GRID_CLS = 'grid grid-cols-[110px_1.3fr_1fr_130px_130px_130px] gap-4 px-5'
+const RESOURCE_HEADERS = ['Service', 'Name', 'External ID', 'Region', 'Status', 'Last Seen']
+
 // ─── SkeletonRow ──────────────────────────────────────────────────────────────
 
 function SkeletonRow() {
   return (
-    <TableRow>
-      <TableCell><div className="h-4 w-14 bg-muted animate-pulse rounded" /></TableCell>
-      <TableCell><div className="h-4 w-32 bg-muted animate-pulse rounded" /></TableCell>
-      <TableCell><div className="h-4 w-28 bg-muted animate-pulse rounded" /></TableCell>
-      <TableCell><div className="h-4 w-20 bg-muted animate-pulse rounded" /></TableCell>
-      <TableCell><div className="h-4 w-16 bg-muted animate-pulse rounded" /></TableCell>
-      <TableCell><div className="h-4 w-16 bg-muted animate-pulse rounded" /></TableCell>
-    </TableRow>
+    <div className={cn(RESOURCE_GRID_CLS, 'py-3.5 border-b border-border/40')}>
+      {Array.from({ length: RESOURCE_HEADERS.length }, (_, i) => (
+        <div key={i} className="h-3 w-full bg-muted animate-pulse rounded" />
+      ))}
+    </div>
   )
 }
 
@@ -748,24 +750,50 @@ function ResourceRow({ resource, onSelect }: { resource: Resource; onSelect: (r:
   const lastSeen = formatRelativeTime(resource.last_seen_at)
 
   return (
-    <TableRow
-      className="cursor-pointer hover:bg-muted/20 transition-colors duration-150"
+    <div
+      className={cn(
+        RESOURCE_GRID_CLS,
+        'py-3 border-b border-border/40 bg-card hover:bg-card/60 transition-colors duration-150 cursor-pointer group last:border-b-0',
+      )}
       onClick={() => onSelect(resource)}
     >
-      <TableCell>
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Icon size={13} />
-          {serviceLabel}
+      {/* Service */}
+      <div className="self-center flex items-center gap-1.5 min-w-0">
+        <Icon size={13} className="shrink-0 text-white" />
+        <span className="text-sm text-white">{serviceLabel}</span>
+      </div>
+
+      {/* Name */}
+      <div className="self-center min-w-0">
+        <p className="text-sm font-medium text-white truncate group-hover:text-primary transition-colors duration-150">
+          {resource.name || '—'}
+        </p>
+      </div>
+
+      {/* External ID */}
+      <div className="self-center min-w-0">
+        <span className="text-sm text-white/70 font-mono truncate block">
+          {resource.external_id}
         </span>
-      </TableCell>
-      <TableCell className="font-medium text-sm max-w-48 truncate">{resource.name || '—'}</TableCell>
-      <TableCell className="font-mono text-xs text-muted-foreground max-w-40 truncate">{resource.external_id}</TableCell>
-      <TableCell className="text-xs text-muted-foreground">{resource.region}</TableCell>
-      <TableCell>
-        <Badge variant="outline" className={`text-xs ${sCls}`}>{resource.status}</Badge>
-      </TableCell>
-      <TableCell className="text-xs text-muted-foreground">{lastSeen}</TableCell>
-    </TableRow>
+      </div>
+
+      {/* Region */}
+      <div className="self-center">
+        <span className="text-sm text-white">{resource.region || '—'}</span>
+      </div>
+
+      {/* Status */}
+      <div className="self-center">
+        <span className={cn('inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full lowercase tracking-wide', sCls)}>
+          {resource.status}
+        </span>
+      </div>
+
+      {/* Last Seen */}
+      <div className="self-center">
+        <span className="text-sm text-white">{lastSeen}</span>
+      </div>
+    </div>
   )
 }
 
@@ -928,7 +956,7 @@ export function ResourcesView({ accounts, defaultAccountId }: ResourcesViewProps
         <Select value={service || 'all'} onValueChange={(v) => { setService(v === 'all' ? '' : (v ?? '')); setOffset(0) }}>
           <SelectTrigger size="sm" className="w-36"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Services</SelectItem>
+            <SelectItem value="all">All Service</SelectItem>
             <SelectItem value="ec2">EC2</SelectItem>
             <SelectItem value="rds">RDS</SelectItem>
             <SelectItem value="s3">S3</SelectItem>
@@ -940,7 +968,7 @@ export function ResourcesView({ accounts, defaultAccountId }: ResourcesViewProps
         <Select value={region || 'all'} onValueChange={(v) => { setRegion(v === 'all' ? '' : (v ?? '')); setOffset(0) }}>
           <SelectTrigger size="sm" className="w-36"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Regions</SelectItem>
+            <SelectItem value="all">All Region</SelectItem>
             {uniqueRegions.map((r) => (
               <SelectItem key={r} value={r}>{r}</SelectItem>
             ))}
@@ -950,7 +978,7 @@ export function ResourcesView({ accounts, defaultAccountId }: ResourcesViewProps
         <Select value={status || 'all'} onValueChange={(v) => { setStatus(v === 'all' ? '' : (v ?? '')); setOffset(0) }}>
           <SelectTrigger size="sm" className="w-36"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
@@ -998,26 +1026,24 @@ export function ResourcesView({ accounts, defaultAccountId }: ResourcesViewProps
       {/* Table */}
       {!isError && (
         <div className="rounded-xl border border-border/50 overflow-hidden bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/20 hover:bg-muted/20">
-                <TableHead className="w-24 text-[11px] uppercase tracking-wider text-muted-foreground">Service</TableHead>
-                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">Name</TableHead>
-                <TableHead className="text-[11px] uppercase tracking-wider text-muted-foreground">External ID</TableHead>
-                <TableHead className="w-28 text-[11px] uppercase tracking-wider text-muted-foreground">Region</TableHead>
-                <TableHead className="w-28 text-[11px] uppercase tracking-wider text-muted-foreground">Status</TableHead>
-                <TableHead className="w-28 text-[11px] uppercase tracking-wider text-muted-foreground">Last Seen</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading
-                ? Array.from({ length: 6 }, (_, i) => <SkeletonRow key={i} />)
-                : resources.map((resource) => (
-                    <ResourceRow key={resource.id} resource={resource} onSelect={setSelectedResource} />
-                  ))
-              }
-            </TableBody>
-          </Table>
+          {/* Column headers */}
+          <div className={cn(RESOURCE_GRID_CLS, 'py-2.5 bg-primary border-b border-primary/20')}>
+            {RESOURCE_HEADERS.map((h) => (
+              <span key={h} className="text-sm text-white uppercase tracking-widest font-medium">
+                {h}
+              </span>
+            ))}
+          </div>
+
+          {/* Rows */}
+          <div>
+            {isLoading
+              ? Array.from({ length: 6 }, (_, i) => <SkeletonRow key={i} />)
+              : resources.map((resource) => (
+                  <ResourceRow key={resource.id} resource={resource} onSelect={setSelectedResource} />
+                ))
+            }
+          </div>
 
           {isEmpty && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
