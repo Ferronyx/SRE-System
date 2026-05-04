@@ -15,6 +15,7 @@ import {
   BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { EmptyState } from '@/components/EmptyState'
+import { cn } from '@/lib/utils'
 import { useOrgIncidents, useResolveIncident, useUpdateIncident } from '@/api/useThresholds'
 import { useOrgMembers } from '@/api/useOrgMembers'
 import type { OrgIncident } from '@/api/thresholds'
@@ -45,10 +46,10 @@ function assigneeInitials(name: string): string {
   return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 }
 
-const priorityConfig: Record<string, { label: string; cls: string; dot: string }> = {
-  high:   { label: 'High',   cls: 'bg-red-500/15 text-red-400 border border-red-500/20',       dot: 'bg-red-400' },
-  medium: { label: 'Medium', cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/20', dot: 'bg-amber-400' },
-  low:    { label: 'Low',    cls: 'bg-muted text-white border border-border',     dot: 'bg-muted-foreground/40' },
+const priorityConfig: Record<string, { label: string; cls: string; dot: string; rowBorder: string }> = {
+  high:   { label: 'High',   cls: 'bg-red-500/15 text-red-400 border border-red-500/20',       dot: 'bg-red-400',            rowBorder: 'border-l-4 border-l-red-500/60' },
+  medium: { label: 'Medium', cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/20', dot: 'bg-amber-400',          rowBorder: 'border-l-4 border-l-amber-500/50' },
+  low:    { label: 'Low',    cls: 'bg-muted text-white border border-border',                  dot: 'bg-muted-foreground/40', rowBorder: 'border-l-4 border-l-border/40' },
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -80,7 +81,7 @@ function IncidentRow({
   const resolveIncidentMutation = useResolveIncident(orgId)
   const updateIncidentMutation = useUpdateIncident(orgId)
 
-  function handleStatusChange(value: string) {
+  function handleStatusChange(value: string | null) {
     if (value === 'resolved' && incident.status === 'open') {
       resolveIncidentMutation.mutate(incident.id, {
         onSuccess: () => toast.success('Incident resolved'),
@@ -89,8 +90,8 @@ function IncidentRow({
     }
   }
 
-  function handleAssigneeChange(value: string) {
-    const assignedTo = value === '__unassigned__' ? null : value
+  function handleAssigneeChange(value: string | null) {
+    const assignedTo = value === '__unassigned__' || value === null ? null : value
     updateIncidentMutation.mutate(
       { incidentId: incident.id, body: { assigned_to: assignedTo } },
       {
@@ -106,7 +107,10 @@ function IncidentRow({
 
   return (
     <div
-      className="grid grid-cols-[1fr_160px_110px_110px_100px_140px_160px_150px] gap-4 px-5 py-3 border-b border-border/40 hover:bg-muted/30 transition-colors duration-150 cursor-pointer group"
+      className={cn(
+        'grid grid-cols-[1fr_160px_110px_110px_100px_140px_160px_150px] gap-4 px-5 py-3 border-b border-border/40 hover:bg-muted/30 transition-colors duration-150 cursor-pointer group',
+        priority.rowBorder,
+      )}
       onClick={() => navigate({ to: '/incidents/$incidentId', params: { incidentId: incident.id } })}
     >
       {/* Name */}

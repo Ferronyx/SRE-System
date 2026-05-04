@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Info,
-  Sparkles,
   Server,
   Database,
   HardDrive,
@@ -21,6 +20,7 @@ import { useOrgIncidents } from '@/api/useThresholds'
 import { useCurrentOrgId } from '@/utils/useCurrentOrgId'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import type { OrgIncident } from '@/api/thresholds'
+import { BreadCrumbs } from '@/components/BreadCrumbs'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -125,7 +125,7 @@ function UptimeChart({ data }: { data: number[] }) {
             width={w}
             height={barH}
             rx={2}
-            fill={isMax ? 'oklch(0.68 0.17 255 / 0.55)' : 'oklch(0.68 0.17 255 / 0.18)'}
+            fill={isMax ? 'oklch(0.72 0.14 192 / 0.55)' : 'oklch(0.72 0.14 192 / 0.18)'}
           />
         )
       })}
@@ -157,12 +157,12 @@ function LatencyChart({ data }: { data: number[] }) {
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="36" className="mt-1">
       <defs>
         <linearGradient id="lat-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="oklch(0.68 0.17 255)" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="oklch(0.68 0.17 255)" stopOpacity="0" />
+          <stop offset="0%" stopColor="oklch(0.72 0.14 192)" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="oklch(0.72 0.14 192)" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#lat-fill)" />
-      <path d={d} fill="none" stroke="oklch(0.68 0.17 255)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke="oklch(0.72 0.14 192)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -194,17 +194,22 @@ export default function DashboardPage() {
     <div className="flex-1 flex flex-col -m-6 lg:-m-8">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-6 lg:px-8 py-4 border-b border-white/5">
-        <div className="flex items-center gap-1.5 text-sm font-medium">
-          <span className="text-white uppercase tracking-widest">SRE System</span>
-          <span className="text-white/20">/</span>
-          <span className="text-white uppercase tracking-widest">Dashboard</span>
-        </div>
+      <div className="flex items-center justify-between px-6 lg:px-8 py-4 border-b border-white/10">
+        <BreadCrumbs items={[{ label: 'Dashboard', url: '/dashboard' }]} />
+      </div>
 
-        <div className="flex items-center gap-2">
-          <span className={cn('h-1.5 w-1.5 rounded-full animate-pulse', statusCfg.dot)} />
-          <span className="text-sm text-white uppercase tracking-widest font-medium">{statusCfg.label}</span>
-        </div>
+      {/* ── Status banner ──────────────────────────────────────────────────── */}
+      <div className={cn(
+        'flex items-center gap-2.5 px-6 lg:px-8 py-2 border-b text-sm font-medium shrink-0',
+        statusKey === 'healthy'  ? 'bg-emerald-500/5 border-emerald-500/15 text-emerald-400' :
+        statusKey === 'degraded' ? 'bg-amber-500/5 border-amber-500/15 text-amber-400' :
+                                   'bg-red-500/5 border-red-500/15 text-red-400',
+      )}>
+        <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', statusCfg.dot)} />
+        <span>{statusCfg.label}</span>
+        <span className="ml-auto text-muted-foreground text-sm font-normal">
+          {summary?.active_incident_count ?? 0} active · {summary?.resolved_last_24h_count ?? 0} resolved today
+        </span>
       </div>
 
       {/* ── Main ───────────────────────────────────────────────────────────── */}
@@ -214,9 +219,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-3 gap-4">
           {/* Uptime */}
           <div className="bg-card rounded-xl overflow-hidden">
-            <div className="h-[2px] bg-gradient-to-r from-emerald-500 via-emerald-400/60 to-transparent" />
             <div className="p-5 space-y-2">
-              <p className="text-sm text-white uppercase tracking-widest font-medium">Global Uptime</p>
+              <p className="text-sm text-emerald-400 uppercase tracking-widest font-medium">Global Uptime</p>
               <p className="text-[2.1rem] font-bold text-white tracking-tight leading-none">{uptimeDisplay}</p>
               <UptimeChart data={summary?.uptime_sparkline ?? []} />
             </div>
@@ -224,9 +228,8 @@ export default function DashboardPage() {
 
           {/* Latency */}
           <div className="bg-card rounded-xl overflow-hidden">
-            <div className="h-[2px] bg-gradient-to-r from-blue-500 via-blue-400/60 to-transparent" />
             <div className="p-5 space-y-2">
-              <p className="text-sm text-white uppercase tracking-widest font-medium">P99 Latency</p>
+              <p className="text-sm text-primary uppercase tracking-widest font-medium">P99 Latency</p>
               <p className="text-[2.1rem] font-bold text-white tracking-tight leading-none">
                 {latencyDisplay != null
                   ? <>{latencyDisplay}<span className="text-lg font-normal text-white ml-1">ms</span></>
@@ -372,10 +375,9 @@ export default function DashboardPage() {
           </div>
 
           {/* ── Prevention Hub ─────────────────────────────────────────────── */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <h2 className="text-base font-semibold text-white">Prevention Hub</h2>
 
-            {/* AI Recommendation — gradient border card */}
             <div className="p-[1px] rounded-xl bg-gradient-to-br from-violet-500/50 via-fuchsia-500/25 to-blue-600/30">
               <div className="bg-[#0d0f16] rounded-xl p-4 space-y-3.5">
 
@@ -403,7 +405,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Quick stats */}
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-card rounded-xl p-3.5 space-y-1">
                 <p className="text-sm text-white uppercase tracking-widest font-medium">Active</p>
@@ -416,28 +417,10 @@ export default function DashboardPage() {
                 <p className="text-sm text-white">last 24h</p>
               </div>
             </div>
-          </div>
+          </div> */}
 
         </div>
-      </div>
-
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <div className="px-6 lg:px-8 py-4 border-t border-white/5 flex items-center justify-between">
-        <p className="text-sm text-white uppercase tracking-widest">
-          SRE System · SRE Platform
-        </p>
-        <div className="flex items-center gap-5">
-          {['Documentation', 'API Reference', 'Status Page'].map((label) => (
-            <span
-              key={label}
-              className="text-sm text-white uppercase tracking-widest hover:text-white/60 cursor-pointer transition-colors duration-200"
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
-
+      </div>      
     </div>
   )
 }
