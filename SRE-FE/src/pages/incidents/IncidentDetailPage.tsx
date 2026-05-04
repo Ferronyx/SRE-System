@@ -7,10 +7,7 @@ import {
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { Button } from '@/components/ui/button'
-import {
-  Breadcrumb, BreadcrumbItem, BreadcrumbLink,
-  BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+import { BreadCrumbs } from '@/components/BreadCrumbs'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
@@ -56,10 +53,14 @@ function getServiceLabel(service: string): string {
   return SERVICE_LABELS[service?.toLowerCase()] ?? service?.toUpperCase() ?? '—'
 }
 
-const priorityConfig: Record<string, { label: string; cls: string; dot: string }> = {
-  high:   { label: 'High',   cls: 'bg-red-500/15 text-red-400 border-red-500/20',       dot: 'bg-red-400' },
-  medium: { label: 'Medium', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/20', dot: 'bg-amber-400' },
-  low:    { label: 'Low',    cls: 'bg-muted text-white border-border',                    dot: 'bg-white/30' },
+const priorityConfig: Record<string, { label: string; cls: string }> = {
+  high:   { label: 'High',   cls: 'bg-red-500/15 text-red-400 border border-red-500/20' },
+  medium: { label: 'Medium', cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/20' },
+  low:    { label: 'Low',    cls: 'bg-muted text-white border border-border' },
+}
+
+const PRIORITY_LABELS: Record<string, string> = {
+  high: 'High', medium: 'Medium', low: 'Low',
 }
 
 // ─── InfoField ────────────────────────────────────────────────────────────────
@@ -68,7 +69,7 @@ function InfoField({ label, value, mono }: { label: string; value: string; mono?
   return (
     <div className="space-y-1">
       <p className="text-sm text-white">{label}</p>
-      <p className={`text-sm text-white ${mono ? 'font-mono break-all' : ''}`}>{value}</p>
+      <p className={`text-sm font-bold text-white ${mono ? 'font-mono break-all' : ''}`}>{value}</p>
     </div>
   )
 }
@@ -77,8 +78,8 @@ function InfoField({ label, value, mono }: { label: string; value: string; mono?
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border/60 overflow-hidden">
-      <div className="px-5 py-3 border-b border-border/40 bg-muted/10">
+    <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden">
+      <div className="px-5 py-3 border-b border-primary/20 bg-primary/10">
         <p className="text-sm font-medium text-white uppercase tracking-widest">{title}</p>
       </div>
       <div className="px-5 py-4">
@@ -97,6 +98,9 @@ function ManagementCard({ incident, orgId }: { incident: OrgIncident; orgId: str
 
   const members = membersData?.data ?? []
   const isResolved = incident.status === 'resolved'
+  const assigneeName = incident.assigned_to
+    ? (members.find(m => m.id === incident.assigned_to)?.full_name ?? incident.assigned_to)
+    : null
 
   async function handleResolve() {
     try {
@@ -135,8 +139,8 @@ function ManagementCard({ incident, orgId }: { incident: OrgIncident; orgId: str
   }
 
   return (
-    <div className="rounded-xl border border-border/60 overflow-hidden">
-      <div className="px-5 py-3 border-b border-border/40 bg-muted/10">
+    <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden">
+      <div className="px-5 py-3 border-b border-primary/20 bg-primary/10">
         <p className="text-sm font-medium text-white uppercase tracking-widest">Management</p>
       </div>
       <div className="px-5 py-4 space-y-5">
@@ -175,7 +179,7 @@ function ManagementCard({ incident, orgId }: { incident: OrgIncident; orgId: str
             disabled={updateIncidentMutation.isPending || isResolved}
           >
             <SelectTrigger className="h-8 text-sm w-full text-white">
-              <SelectValue />
+              <SelectValue>{PRIORITY_LABELS[incident.priority?.toLowerCase()] ?? incident.priority}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="high">High</SelectItem>
@@ -194,12 +198,12 @@ function ManagementCard({ incident, orgId }: { incident: OrgIncident; orgId: str
             disabled={updateIncidentMutation.isPending}
           >
             <SelectTrigger className="h-8 text-sm w-full text-white">
-              <SelectValue placeholder="Unassigned" />
+              <SelectValue>{assigneeName ?? 'Unassigned'}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__unassigned__">Unassigned</SelectItem>
               {members.map(m => (
-                <SelectItem key={m.id} value={m.full_name}>{m.full_name}</SelectItem>
+                <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -253,7 +257,7 @@ export default function IncidentDetailPage() {
   const ServiceIcon = getServiceIcon(incident.resource_service)
   const serviceLabel = getServiceLabel(incident.resource_service)
   const duration = getDuration(incident.started_at, incident.resolved_at)
-  const priority = priorityConfig[incident.priority] ?? priorityConfig.low
+  const priority = priorityConfig[incident.priority?.toLowerCase()] ?? priorityConfig.low
   const rawJson = incident.raw_payload != null
     ? JSON.stringify(incident.raw_payload, null, 2)
     : null
@@ -271,34 +275,13 @@ export default function IncidentDetailPage() {
     <div className="flex-1 flex flex-col -m-6 lg:-m-8">
 
       {/* Breadcrumb bar */}
-      <div className="flex items-center justify-between px-6 lg:px-8 py-4 border-b border-border/40 shrink-0">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link to="/dashboard" />}
-                className="text-white hover:text-white text-sm font-medium transition-colors"
-              >
-                Dashboard
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-white" />
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link to="/incidents" search={{ offset: 0 }} />}
-                className="text-white hover:text-white text-sm font-medium transition-colors"
-              >
-                Incidents
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-white" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-white text-sm font-medium max-w-xs truncate">
-                {incident.metric_name}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="flex items-center justify-between px-6 lg:px-8 py-4 bg-card/80 backdrop-blur-sm border-b border-border/60 shrink-0">
+        <BreadCrumbs
+          items={[
+            { label: 'Incidents', url: '/incidents' },
+            { label: incident.metric_name },
+          ]}
+        />
 
         <Button
           variant="ghost"
@@ -311,27 +294,9 @@ export default function IncidentDetailPage() {
       </div>
 
       {/* Incident header */}
-      <div className="px-6 lg:px-8 py-5 border-b border-border/40 bg-muted/10 shrink-0">
+      <div className="px-6 lg:px-8 py-5 border-b border-border/60 bg-card/60 backdrop-blur-sm shrink-0">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={`inline-flex items-center text-sm font-medium px-2.5 py-0.5 rounded border uppercase tracking-wide ${statusCls}`}>
-                {incident.status}
-              </span>
-              <span className={`inline-flex items-center text-sm font-medium px-2.5 py-0.5 rounded border uppercase tracking-wide ${stateCls}`}>
-                {stateLabel}
-              </span>
-              <span className={`inline-flex items-center gap-1.5 text-sm font-medium px-2.5 py-0.5 rounded border uppercase tracking-wide ${priority.cls}`}>
-                <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${priority.dot}`} />
-                {priority.label}
-              </span>
-              {incident.status === 'open' && (
-                <span className="flex items-center gap-1.5 text-sm text-red-400 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-                  Active · {duration}
-                </span>
-              )}
-            </div>
             <h1 className="text-xl font-semibold text-white">{incident.metric_name}</h1>
             <div className="flex items-center gap-1.5 text-sm text-white">
               <ServiceIcon size={13} className="shrink-0" />
@@ -341,6 +306,23 @@ export default function IncidentDetailPage() {
                   <span className="opacity-30">·</span>
                   <span>{incident.resource_region}</span>
                 </>
+              )}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`inline-flex items-center text-sm font-medium px-2.5 py-0.5 rounded-full border lowercase tracking-wide ${statusCls}`}>
+                {incident.status}
+              </span>
+              <span className={`inline-flex items-center text-sm font-medium px-2.5 py-0.5 rounded-full border lowercase tracking-wide ${stateCls}`}>
+                {stateLabel}
+              </span>
+              <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full lowercase tracking-wide ${priority.cls}`}>
+                {priority.label}
+              </span>
+              {incident.status === 'open' && (
+                <span className="flex items-center gap-1.5 text-sm text-red-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
+                  Active · {duration}
+                </span>
               )}
             </div>
           </div>
@@ -401,7 +383,7 @@ export default function IncidentDetailPage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-white">Service</p>
-                    <div className="flex items-center gap-1.5 text-sm text-white">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-white">
                       <ServiceIcon size={13} className="text-white" />
                       {serviceLabel}
                     </div>

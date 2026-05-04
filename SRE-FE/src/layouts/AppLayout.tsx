@@ -7,7 +7,7 @@ import {
   Cloud,
   ChevronsLeft,
   ChevronsRight,
-  LayoutDashboard,
+  // LayoutDashboard,
   LogOut,
   Settings,
   User,
@@ -27,7 +27,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { to: '/dashboard',      icon: LayoutDashboard, label: 'Dashboard' },
+  // { to: '/dashboard',      icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/incidents',      icon: AlertCircle,     label: 'Incidents' },
   { to: '/cloud-accounts', icon: Cloud,           label: 'Cloud Accounts' },
   { to: '/orgs',           icon: Building2,       label: 'Organization' },
@@ -63,7 +63,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background auth-glow">
       {/* Sidebar */}
       <aside className={cn(
         'flex flex-col shrink-0 bg-sidebar overflow-hidden transition-[width] duration-200 ease-in-out',

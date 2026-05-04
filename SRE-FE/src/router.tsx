@@ -12,7 +12,7 @@ import RegisterPage from '@/pages/auth/RegisterPage'
 import ProfilePage from '@/pages/user/ProfilePage'
 import OrgListPage from '@/pages/org/OrgListPage'
 import OrgMembersPage from '@/pages/org/OrgMembersPage'
-import DashboardPage from '@/pages/dashboard/DashboardPage'
+// import DashboardPage from '@/pages/dashboard/DashboardPage'
 import CloudAccountsPage from '@/pages/cloud/CloudAccountsPage'
 import IncidentsListPage from '@/pages/incidents/IncidentsListPage'
 import IncidentDetailPage from '@/pages/incidents/IncidentDetailPage'
@@ -32,7 +32,7 @@ const authRoute = createRoute({
   id: 'auth',
   component: AuthLayout,
   beforeLoad: ({ context }) => {
-    if (context.auth.isAuthenticated) throw redirect({ to: '/dashboard' })
+    if (context.auth.isAuthenticated) throw redirect({ to: '/orgs' })
   },
 })
 
@@ -58,11 +58,11 @@ const appRoute = createRoute({
   },
 })
 
-const dashboardRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: '/dashboard',
-  component: DashboardPage,
-})
+// const dashboardRoute = createRoute({
+//   getParentRoute: () => appRoute,
+//   path: '/dashboard',
+//   component: DashboardPage,
+// })
 
 const profileRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -108,7 +108,7 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: ({ context }) => {
-    throw redirect({ to: context.auth.isAuthenticated ? '/dashboard' : '/login' })
+    throw redirect({ to: context.auth.isAuthenticated ? '/orgs' : '/login' })
   },
 })
 
@@ -116,7 +116,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   authRoute.addChildren([loginRoute, registerRoute]),
   appRoute.addChildren([
-    dashboardRoute,
+    // dashboardRoute,
     profileRoute,
     orgListRoute,
     orgMembersRoute,

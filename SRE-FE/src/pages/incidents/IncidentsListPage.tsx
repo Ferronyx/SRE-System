@@ -1,5 +1,5 @@
 import { useState, type ElementType } from 'react'
-import { useSearch, useNavigate, Link } from '@tanstack/react-router'
+import { useSearch, useNavigate } from '@tanstack/react-router'
 import {
   Server, Database, HardDrive, Zap, Globe, Box,
   Activity, ChevronLeft, ChevronRight, AlertCircle, Search,
@@ -10,10 +10,7 @@ import { Input } from '@/components/ui/input'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import {
-  Breadcrumb, BreadcrumbItem, BreadcrumbLink,
-  BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+import { BreadCrumbs } from '@/components/BreadCrumbs'
 import { EmptyState } from '@/components/EmptyState'
 import { cn } from '@/lib/utils'
 import { useOrgIncidents, useResolveIncident, useUpdateIncident } from '@/api/useThresholds'
@@ -27,6 +24,13 @@ import { useCurrentOrgId } from '@/utils/useCurrentOrgId'
 const LIMIT = 20
 const FROM_PATH = '/app/incidents' as const
 const NAV_PATH  = '/incidents'      as const
+
+const STATUS_LABELS: Record<string, string> = {
+  all: 'All Status', open: 'Open', resolved: 'Resolved',
+}
+const PRIORITY_LABELS: Record<string, string> = {
+  all: 'All Priority', high: 'High', medium: 'Medium', low: 'Low',
+}
 
 const SERVICE_ICONS: Record<string, ElementType> = {
   ec2: Server, rds: Database, s3: HardDrive, lambda: Zap, elb: Globe,
@@ -105,12 +109,14 @@ function IncidentRow({
     ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/15'
     : 'border-border text-white/60 bg-muted/40 hover:bg-muted/60'
 
+  const assigneeName = incident.assigned_to
+    ? (members.find(m => m.id === incident.assigned_to)?.full_name ?? incident.assigned_to)
+    : null
+
   return (
     <div
       className={cn(
-        'grid grid-cols-[1fr_160px_110px_110px_100px_140px_160px_150px] gap-4 px-5 py-3 border-b border-border/40 hover:bg-muted/30 transition-colors duration-150 cursor-pointer group',
-        priority.rowBorder,
-      )}
+        'grid grid-cols-[1fr_160px_110px_110px_100px_140px_160px_150px] gap-4 px-5 py-3 border-b border-border/40 bg-card hover:bg-card/60 transition-colors duration-150 cursor-pointer group' )}
       onClick={() => navigate({ to: '/incidents/$incidentId', params: { incidentId: incident.id } })}
     >
       {/* Name */}
@@ -140,8 +146,7 @@ function IncidentRow({
 
       {/* Priority */}
       <div className="self-center">
-        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded uppercase tracking-wide ${priority.cls}`}>
-          <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${priority.dot}`} />
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full lowercase tracking-wide ${priority.cls}`}>
           {priority.label}
         </span>
       </div>
@@ -172,12 +177,12 @@ function IncidentRow({
         >
           <SelectTrigger className="h-7 text-sm px-2 w-full text-white">
             <div className="flex items-center gap-1.5 min-w-0">
-              {incident.assigned_to ? (
+              {assigneeName ? (
                 <>
                   <div className="h-4 w-4 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <span className="text-[9px] font-semibold text-primary">{assigneeInitials(incident.assigned_to)}</span>
+                    <span className="text-[9px] font-semibold text-primary">{assigneeInitials(assigneeName)}</span>
                   </div>
-                  <span className="truncate text-white">{incident.assigned_to}</span>
+                  <span className="truncate text-white">{assigneeName}</span>
                 </>
               ) : (
                 <span className="text-white">Unassigned</span>
@@ -187,7 +192,7 @@ function IncidentRow({
           <SelectContent>
             <SelectItem value="__unassigned__">Unassigned</SelectItem>
             {members.map(m => (
-              <SelectItem key={m.id} value={m.full_name}>{m.full_name}</SelectItem>
+              <SelectItem key={m.id} value={m.id}>{m.full_name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -250,25 +255,8 @@ export default function IncidentsListPage() {
     <div className="flex-1 flex flex-col -m-6 lg:-m-8">
 
       {/* Breadcrumb bar */}
-      <div className="flex items-center justify-between px-6 lg:px-8 py-4 border-b border-border/40 shrink-0">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link to="/dashboard" />}
-                className="text-white hover:text-white text-sm font-medium transition-colors"
-              >
-                Dashboard
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-muted-foreground/30" />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-white text-sm font-medium">
-                Incidents
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="flex items-center justify-between px-6 lg:px-8 py-4 bg-card/80 backdrop-blur-sm border-b border-border/60 shrink-0">
+        <BreadCrumbs items={[{ label: 'Incidents' }]} />
 
         {total > 0 && (
           <span className="text-sm text-white font-medium">{total} incidents</span>
@@ -276,20 +264,20 @@ export default function IncidentsListPage() {
       </div>
 
       {/* Search + Filter bar */}
-      <div className="flex items-center gap-3 px-6 lg:px-8 py-3 border-b border-border/40 bg-muted/10 shrink-0">
+      <div className="flex items-center gap-3 px-6 lg:px-8 py-3 border-b border-border/50 bg-card/50 backdrop-blur-sm shrink-0">
         <div className="relative flex-1 max-w-sm">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name or resource…"
-            className="pl-8 h-8 text-sm"
+            className="pl-8 h-8 text-sm bg-card border-border/60"
           />
         </div>
 
         <Select value={statusFilter} onValueChange={v => setStatusFilter(v as typeof statusFilter)}>
-          <SelectTrigger className="h-8 w-36 text-sm">
-            <SelectValue />
+          <SelectTrigger className="h-8 w-40 text-sm">
+            <SelectValue>{STATUS_LABELS[statusFilter]}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
@@ -299,8 +287,8 @@ export default function IncidentsListPage() {
         </Select>
 
         <Select value={priorityFilter} onValueChange={v => setPriorityFilter(v as typeof priorityFilter)}>
-          <SelectTrigger className="h-8 w-36 text-sm">
-            <SelectValue />
+          <SelectTrigger className="h-8 w-40 text-sm">
+            <SelectValue>{PRIORITY_LABELS[priorityFilter]}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Priority</SelectItem>
@@ -312,10 +300,10 @@ export default function IncidentsListPage() {
       </div>
 
       {/* Table */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden mx-8">
 
         {/* Column headers */}
-        <div className="grid grid-cols-[1fr_160px_110px_110px_100px_140px_160px_150px] gap-4 px-5 py-2.5 border-b border-border/40 bg-muted/20 shrink-0">
+        <div className="grid grid-cols-[1fr_160px_110px_110px_100px_140px_160px_150px] gap-4 px-5 py-2.5 border-b border-primary/20 bg-primary shrink-0">
           {['Name', 'Resource', 'Region', 'Threshold', 'Priority', 'Status', 'Assigned', 'Date'].map(h => (
             <span key={h} className="text-sm text-white uppercase tracking-widest font-medium">
               {h}
@@ -371,7 +359,7 @@ export default function IncidentsListPage() {
 
         {/* Pagination */}
         {!isLoading && !isError && total > 0 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-border/40 bg-muted/20 shrink-0">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border/60 bg-card/80 backdrop-blur-sm shrink-0">
             <span className="text-sm text-white">
               {currentStart}–{currentEnd} of {total}
             </span>
